@@ -12,11 +12,11 @@ suppressMessages({
 })
 
 # Organize inputs
-tcr_dir <- "/Users/zhangyingchen/Desktop/AvY antiCD49d study/TCR_Schwulst04_11.18.2022/Matrix"
-output_dir <- "/Users/zhangyingchen/Desktop/AvY antiCD49d study/TCRSeuratmerge"
+tcr_dir <- "~"
+output_dir <- "~"
 
 # Source helper functions
-source("/Users/zhangyingchen/Desktop/AvY antiCD49d study/scRNA/00_helper_functions.R")
+source("~")
 
 # Create output directory
 dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)

@@ -1,32 +1,8 @@
 Tcells <- subset(s, idents=c("T"))
 Tcells<-FindVariableFeatures(Tcells)
-#Tcells<-scaleData(Tcells, assay=)
 Tcells <- RunPCA(object = Tcells, verbose = FALSE, assay = "integrated")
 Tcells <- RunUMAP(Tcells, dims = 1:30, verbose = FALSE)
 Tcells <- FindNeighbors(object = Tcells, dims = 1:30)
-DefaultAssay(Tcells) <- "integrated"
-Tcells_1.2 <- FindClusters(object = Tcells, resolution = 1.2) 
-DimPlot(Tcells_1.2)
-markers_Th<- c("Cd3e","Cd4", "Cd8a","Cd69","Runx3","Cxcr6","Tbx21","Cxcr3","Ifng","Gata3","Il4","Rorc",
-               "Il10","Tgfb","Foxp3","Sell","Tcf1","Lef1","Ccr7")
-DefaultAssay(object = Tcells_1.2) <- "RNA"
-Tcells_1.2 <- NormalizeData(Tcells_1.2, verbose = FALSE)
-VlnPlot(Tcells_1.2, features = markers_Th, stack = T, flip = T,sort = FALSE, same.y.lims = TRUE)+
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))  
-
-Idents(Tcells_1.2)<-Tcells_1.2$clonal
-DimPlot(Tcells_1.2)
-Tcells_1.2_clonal <- subset(Tcells_1.2, clonal %in% c("NC", "C"))
-Idents(Tcells_1.2_clonal)<-Tcells_1.2_clonal$seurat_clusters
-VlnPlot(Tcells_1.2_clonal, features = markers_Th, stack = T, flip = T,sort = FALSE, same.y.lims = TRUE)+
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))  
-
-Idents(Tcells_1.2)<-Tcells_1.2$orig.ident
-Tcells_1.2 <- AddModuleScore(Tcells_1.2, features = c("Pdcd1","Tox","Lag3","Ctla4","Tnfrsf9"), name = "Exhaustion_Score.")
-Tcells_1.2 <- AddModuleScore(Tcells_1.2, features = c("Cd27","Cd28","Klrg1","Ptprc","Tnf"), name = "Senescence_Score.")
-DotPlot(Tcells_1.2, features = c("Exhaustion_Score.1","Senescence_Score.1"), 
-        group.by = "orig.ident",scale=T,scale.min = 0,col.min = -1, col.max = 2,scale.max = 60,dot.scale = 11,cols="RdBu")+
-  theme(axis.text.x = element_text(angle = 90))
 
 #Projecting scRNA-seq data onto a reference map of tumour-infiltrating lymphocytes (TILs)
 library(remotes)
@@ -58,20 +34,7 @@ query.projected <- NormalizeData(query.projected, verbose = FALSE)
 VlnPlot(query.projected, features = markers_Th, stack = T, flip = T,sort = TRUE, same.y.lims = TRUE)+
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))  
 
-#Idents(query.projected)<-query.projected$orig.ident
-#query.projected <- subset(query.projected, idents=c("ATBI_Isotype","ATBI_aCD49d"))
-#query.projected <- AddModuleScore(query.projected, features = c("Lag3","Ctla4","Tigit"), name = "exhaustion.")
-#query.projected <- AddModuleScore(query.projected, features = c("Cd27","Cd28","Nkg7","Klrg1",""), name = "senescence.")
-#DotPlot(query.projected, features = c("exhaustion.1","senescence.1"), 
-#        group.by = "orig.ident",scale=T,col.min = -0.5, col.max = 1.5, scale.min = 0,scale.max = 40, 
-#        cols = c("lightgrey", "#f2545b"))
-
-save(query.projected, file = "/Users/zhangyingchen/Desktop/AvY antiCD49d study/scRNA/query.projected.rds")
-
-
-#T subtypes
-query_projected <- readRDS(file = "/Users/zhangyingchen/Desktop/AvY_antiCD49d_study/scRNA/query.projected.rds")
-
+#Combine single cell RNAseq with TCRseq
 Idents(query.projected)<-query.projected$clonal
 DimPlot(query.projected,group.by = "functional.cluster", cols = refCols)
 
@@ -170,17 +133,7 @@ ggplot(pt, aes(x = Var1, y = Freq, fill = Var2)) +
   theme(legend.title = element_blank())+
   scale_fill_manual(values=c("red","darkgoldenrod1","lightblue"))
 
-
-DefaultAssay(object = MG) <- "RNA"
-MG <- NormalizeData(MG, verbose = FALSE)
-VlnPlot(query.projected, features=c("Cd28","Tox","Pdcd1","Pdcd1lg2","Cd274"),pt.size = 0.1, group.by = "orig.ident")
-VlnPlot(query.projected_clonal, features=c("Cd28","Tox","Pdcd1","Pdcd1lg2","Cd274"),pt.size =0.1, group.by = "orig.ident")
-VlnPlot(query.projected_C_CD8EF, features=c("Cd28","Tox","Pdcd1","Pdcd1lg2","Cd274"),pt.size =0.1, group.by = "orig.ident")
-VlnPlot(Mac, features=c("Cd28","Tox","Pdcd1","Pdcd1lg2","Cd274"),pt.size =0.1, group.by = "orig.ident")
-VlnPlot(MG, features=c("Cd28","Tox","Pdcd1","Pdcd1lg2","Cd274"),pt.size =0.1, group.by = "orig.ident")
-
-query.projected_C_CD8EF <- AddModuleScore(query.projected_C_CD8EF, features = c("Cd28","Tox","Pdcd1","Pdcd1lg2","Cd274"), name = "enrichment")
-
+# scoring of top expressed genes in the clonally expanded CD8 EF cells 
 query.projected_C_CD8EF <- AddModuleScore(query.projected_C_CD8EF, features = c("Tox"), name = "Tox")
 query.projected_C_CD8EF <- AddModuleScore(query.projected_C_CD8EF, features = c("Rbm3"), name = "Rbm3")
 query.projected_C_CD8EF <- AddModuleScore(query.projected_C_CD8EF, features = c("Ifngr1"), name = "Ifngr1")
@@ -206,25 +159,6 @@ query.projected_C_CD8EF <- AddModuleScore(query.projected_C_CD8EF, features = c(
   p1=p1+stat_compare_means(comparisons = mg_enri.pairs)#, label = "p.signif"
 
 
-
-## Load in libraries
-suppressMessages({
-  library("plyr")
-  library("tidyverse")
-  library("ggrepel")
-  library("ggthemes")
-  library("ggpubr")
-  library("Seurat")
-  library("scales")
-  library("doMC")
-  library("UpSetR")
-  library("colorspace")
-})
-# Set core number for parallel model fitting
-registerDoMC(cores = 3)
-# Specify thresholds
-padj.thresh <- 0.01
-lfc.thresh <- 0.25
   
   # Find DEGs 
   Idents(query.projected_clonal)<-query.projected_clonal$clonal
@@ -277,8 +211,8 @@ lfc.thresh <- 0.25
   
   # Write out results
   write.csv(degs2, "CD8_NC_EF_ATBIaCD49d_vs_ATBI_Isotype_degs.csv")
-  
-  deg_merge <- read.csv("/Users/zhangyingchen/Desktop/AvY_antiCD49d_study/TCRSeuratmerge/_CD8_T_Merge_ATBIaCD49d_vs_ATBI_Isotype_degs.csv")
+  #repeat for all the T cell subsets
+  deg_merge <- read.csv("~_CD8_T_Merge_ATBIaCD49d_vs_ATBI_Isotype_degs.csv")
 
 
   # Create volcano plot
@@ -288,63 +222,7 @@ lfc.thresh <- 0.25
   Treatment in Aged Mice PTBI",
                padj.thresh = padj.thresh, lfc.thresh = lfc.thresh)
   
-  #Repeat with CD8_NL,CD8_EA, Th1
-  #CD8NL
-  query.projected_C_CD8EA<-subset(query.projected_C, idents=c("CD8_EarlyActiv"))
-  query.projected_NC_CD8EA<-subset(query.projected_NC, idents=c("CD8_EarlyActiv"))
-  
-  Idents(query.projected_C_CD8EA)<-query.projected_C_CD8EA$orig.ident
-  Idents(query.projected_NC_CD8EA)<-query.projected_NC_CD8EA$orig.ident
-  
-  DefaultAssay(object = query.projected_C_CD8EA) <- "RNA"
-  query.projected_C_CD8EA <- NormalizeData(query.projected_C_CD8EA, verbose = FALSE)
-  
-  DefaultAssay(object = query.projected_NC_CD8EA) <- "RNA"
-  query.projected_NC_CD8EA <- NormalizeData(query.projected_NC_CD8EA, verbose = FALSE)
-  
-  
-  degs <-FindMarkers(object = query.projected_C_CD8EA,
-                     ident.1 = "YTBI_aCD49d",
-                     ident.2 = "YTBI_Isotype",
-                     test.use = "MAST",
-                     logfc.threshold = -Inf,
-                     min.pct = 0.5,
-                     assay = "RNA"
-  ) 
-  
-  degs2 <-FindMarkers(object = query.projected_NC_CD8EA,
-                      ident.1 = "YTBI_aCD49d",
-                      ident.2 = "YTBI_Isotype",
-                      test.use = "MAST",
-                      logfc.threshold = -Inf,
-                      min.pct = 0.5,
-                      assay = "RNA"
-  )  
-  
-  # Remove ribosomal, mitochondrial, and HLA genes
-  degs <- degs[-grep(pattern = "^Rps|^Rpl|^Mt-|^mt-|^Hla-|^Gm-|^rp-|^H2-", x = rownames(degs)),]
-  degs <- degs[!grepl("Gm", rownames(degs)),]
-  degs <- degs[!grepl("24", rownames(degs)),]
-  # Run Benjamini-Hochberg adjustment
-  degs$BH <- p.adjust(degs$p_val, method = "BH")
-  degs$genes <- rownames(degs)
-  
-  degs2 <- degs2[-grep(pattern = "^Rps|^Rpl|^Mt-|^mt-|^Hla-|^Gm-|^rp-|^H2-", x = rownames(degs2)),]
-  degs2 <- degs2[!grepl("Gm", rownames(degs2)),]
-  degs2 <- degs2[!grepl("24", rownames(degs2)),]
-  # Run Benjamini-Hochberg adjustment
-  degs2$BH <- p.adjust(degs2$p_val, method = "BH")
-  degs2$genes <- rownames(degs2)
-  # Write out results
-  write.csv(degs, "CD8_C_EA_ATBIaCD49d_vs_ATBI_Isotype_degs.csv")
-  
-  # Create volcano plot
-  options(ggrepel.max.overlaps = 10)
-  volcano_plot(degs2, title = "Nonclonal CD8+ NL T Cells with 
-  aCD49d Treatment in Young Mice PTBI",
-               padj.thresh = padj.thresh, lfc.thresh = lfc.thresh)
-  
-  
+ 
 # Run DE on all celltypes
 #cell_types <- c("CD8_EffectorMemory", "CD8_NaiveLike", "Th1","CD4_NaiveLike")
 #mclapply(cell_types, run_de, s = query.projected_aged_clonal, mc.cores = 3)

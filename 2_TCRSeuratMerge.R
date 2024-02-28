@@ -1,11 +1,3 @@
-# Date: 03-10-2023
-# Adapted from codes by Gate Lab Northwestern University
-# Jennie Chen
-# Written by: Natalie Piehl
-# Summary: Merge TCR data with scRNAseq and Remove TCR data for non T-cell annotated cells and update frequency
-#--------------------------------------------------------------------------------------------------------------
-# Initialization
-
 # Load in libraries
 suppressMessages({
   library("plyr")
@@ -14,11 +6,11 @@ suppressMessages({
 })
 
 # Initialize paths
-seurat_object <- "/Users/zhangyingchen/Desktop/AvY antiCD49d study/scRNA"
-output_dir <- "/Users/zhangyingchen/Desktop/AvY antiCD49d study/TCRSeuratmerge/"
+seurat_object <- "~"
+output_dir <- "~"
 
 # Source helper functions
-source("/Users/zhangyingchen/Desktop/AvY antiCD49d study/scRNA/00_helper_functions.R")
+source("~/00_helper_functions.R")
 
 # Generate output directory
 dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
@@ -31,8 +23,8 @@ load(seurat_object)
 
 # Add TCR Data
 # Load in TCR information
-contigs_merged <- read.csv("/Users/zhangyingchen/Desktop/AvY_antiCD49d_study/TCRSeuratmerge/contigs_merged.csv")
-TCRs_paired <- read.csv("/Users/zhangyingchen/Desktop/AvY_antiCD49d_study/TCRSeuratmerge/paired_clonotypes_merged.csv")
+contigs_merged <- read.csv("~contigs_merged.csv")
+TCRs_paired <- read.csv("~paired_clonotypes_merged.csv")
 
 # Remove duplicate rows per cell
 tcr <- contigs_merged[!duplicated(contigs_merged$barcode), ]
@@ -53,7 +45,7 @@ print("Head of TCR")
 head(tcr)
 
 # Add to the Seurat object's metadata.
-samples_integrated_CD49d <- readRDS(file = "/Users/zhangyingchen/Desktop/AvY_antiCD49d_study/scRNA/samples_integrated_CD49d.rds")
+samples_integrated_CD49d <- readRDS(file = "~samples_integrated_CD49d.rds")
 samples_integrated_CD49d <- AddMetaData(object=samples_integrated_CD49d,
                  metadata=tcr)
 
@@ -177,6 +169,5 @@ for (sample in tcr_count$orig.ident) {
 head(s[[c("frequency", "frequency_filtered", "normalized_frequency")]])
 
 # Save modified seurat object
-save(s, file = "/Users/zhangyingchen/Desktop/AvY antiCD49d study/scRNA/s_tcrclean_new.rds")
+save(s, file = "~s_tcrclean_new.rds")
 
-s_tcrclean_new <- readRDS(file = "/Users/zhangyingchen/Desktop/AvY antiCD49d study/scRNA/s_tcrclean_new.rds")

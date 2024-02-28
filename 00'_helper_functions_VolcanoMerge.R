@@ -1,17 +1,4 @@
-# ------------------------------------------------------------------------------
-# -----                                                                    -----
-# -----   Single cell transcriptomics reveals cerebrospinal fluid immune   -----
-# -----  dysregulation during healthy brain aging and cognitive impairment -----
-# -----                                                                    -----
-# -----                           Gate Lab                                 -----
-# -----                     Northwestern University                        -----
-# -----                                                                    -----
-# ------------------------------------------------------------------------------
-#
-# Date: 04-20-2022
-# Written by: Emma Tapp, Natalie Piehl
-# Summary: Define helper functions used across the project
-#
+
 #-------------------------------------------------------------------------------
 # Define functions
 
@@ -147,8 +134,8 @@ volcano_plot <- function(data, file = NULL, title = NULL,
         linetype = 2,
         color = "gray"
       ) +
-      geom_point(aes(size = PFC, color = mac.cell.type), alpha = 0.5) +
-      scale_color_manual(values = c("MDM" = "red","MHCIIlow BAM"="blue")) +
+      geom_point(aes(size = PFC, color = T.cell.type), alpha = 0.5) +
+      scale_color_manual(values = c("CD8NL_NC" = "#edbe2a","CD8NL_C = "#A58AFF", CD8EF_C="#53B400")) +
                                             geom_text_repel(
                                               data = data[which(data$color != 'black'), ],
                                               inherit.aes = T,

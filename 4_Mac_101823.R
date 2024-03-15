@@ -36,11 +36,6 @@ Idents(Mac)=Mac_$level
 DimPlot(Mac)
 DimPlot(Mac, split.by = "orig.ident",ncol = 2,cols = c("grey","firebrick","black","royalblue"))
 
-MDM <- subset(Mac_2, idents=c("MDM"))
-BAM_2 <- subset(Mac_2, idents=c("MHCIIlo BAM_2"))
-BAM_1 <- subset(Mac_2, idents=c("MHCIIlo BAM_1"))
-BAM_hi <- subset(Mac_2, idents=c("MHCIIhi BAM"))
-
 DotPlot(Mac, features = c("Itga4","P2ry12","Tmem119","H2-Aa","H2-DMb1","Klra2","Fxyd5","Maf","Mrc1","Cd163","Gas6","Ccrl2","Ccl3","Ccl4","Il1b","Nfkbia","Lgals3","Ccr2","Vim","Folr2","Ccl7","Ccr1","Lyve1","Ecrg4","Ttr","Enpp2")) + 
   RotatedAxis() +
   theme(legend.position="right")+
@@ -68,22 +63,22 @@ DimPlot(Mac, label=F, cells.highlight= list(MHCIIlow, MHCIIhi), cols.highlight =
 ###---------------------------------------------------------------###
 
 
-Mac_TA <- subset(Mac_, idents=c("MHCIIlo BAM_1","MHCIIlo BAM_2","MDM","MHCIIhi BAM"))
-DimPlot(Mac_TA)
+Mac_2 <- subset(Mac, idents=c("MHCIIlo BAM_1","MHCIIlo BAM_2","MDM","MHCIIhi BAM"))
+DimPlot(Mac_2)
 library(SCORPIUS)
 #Load normalized counts
-DefaultAssay(Mac_TA) <- "SCT"
-Mac_TA <- NormalizeData(Mac_TA)
-expression <- t(Mac_TA@assays$RNA@data)
-expression_SCT <- t(Mac_TA@assays$SCT@data)
-group_name <- Mac_TA@active.ident
+DefaultAssay(Mac_2) <- "SCT"
+Mac_2 <- NormalizeData(Mac_2)
+expression <- t(Mac_2@assays$RNA@data)
+expression_SCT <- t(Mac_2@assays$SCT@data)
+group_name <- Mac_2@active.ident
 
 #using norm RNA assay
 space <- reduce_dimensionality(expression, dist = "spearman", ndim = 3)
 draw_trajectory_plot(space, progression_group = group_name, contour = TRUE)
 traj <- infer_trajectory(space)
 
-my_colour_palette <- c("MHCIIlo BAM_1" = "grey","MDM" = "firebrick","2" = "black", "MHCIIlo BAM_2" = "royalblue")
+my_colour_palette <- c("MHCIIhigh BAM" = "grey","MDM" = "firebrick","MHCIIlo BAM_1" = "black", "MHCIIlo BAM_2" = "royalblue")
 draw_trajectory_plot(
   space, 
   progression_group = group_name,progression_group_palette = my_colour_palette,
@@ -116,19 +111,12 @@ draw_trajectory_heatmap(expr_sel, traj$time, group_name, modules,show_labels_row
                            minSamples=ncol(exprMat)*.01)
 
 # (Adjust minimum values according to your dataset)
-genesKept <- geneFiltering(exprMat, scenicOptions=scenicOptions,
-                           minCountsPerGene=3*.01*ncol(exprMat),
-                           minSamples=ncol(exprMat)*.01)
-exprMat_filtered <- exprMat[genesKept, ]
-dim(exprMat_filtered)
 
-# Run GENIE3
-runGenie3(exprMat_filtered, scenicOptions)
-corrMat <- cor(t(exprMat_filtered), method="spearman")
-save(corrMat, file="/Users/zhangyingchen/Desktop/AvY_antiCD49d_study/scRNA/corrMat.RData")
 
-#DE Analysis
-  
+  ###---------------------------------------------------------------###
+#######-----------------------DE Analysis---------------------#########
+###---------------------------------------------------------------###
+
   Mac_MDM <- subset(Mac, idents=c("MDM"))
   Idents(Mac_MDM)=Mac_MDM$orig.ident
 deg_Mac_MDM <-FindMarkers(object = Mac_MDM,
